@@ -29,11 +29,20 @@ public class GameRun : MonoBehaviour
 	private float RWD_TIE            = -0.1f;
 	private float RWD_HAND_WON       =  1.0f;
 
+    //Tracking
+    int ties = 0;
+    int wins = 0;
+    int losses = 0;
+    int invalids = 0;
+
 	// Other UI elements
 	private UnityEngine.UI.Text textDeck;
     private UnityEngine.UI.Text textAction;
     private UnityEngine.UI.Text textEnemyAction;
-
+    private UnityEngine.UI.Text textTies;
+    private UnityEngine.UI.Text textWins;
+    private UnityEngine.UI.Text textLosses;
+    private UnityEngine.UI.Text textInvalids;
     // Start is called before the first frame update
     void Start()
     {
@@ -53,7 +62,10 @@ public class GameRun : MonoBehaviour
         textDeck = GameObject.Find("TextDeck").GetComponent<UnityEngine.UI.Text>();
         textAction = GameObject.Find("TextAction").GetComponent<UnityEngine.UI.Text>();
         textEnemyAction = GameObject.Find("TextEnemyPlay").GetComponent<UnityEngine.UI.Text>();
-
+        textTies = GameObject.Find("TextTies").GetComponent<UnityEngine.UI.Text>();
+        textWins = GameObject.Find("TextWins").GetComponent<UnityEngine.UI.Text>();
+        textLosses = GameObject.Find("TextLosses").GetComponent<UnityEngine.UI.Text>();
+        textInvalids = GameObject.Find("TextInvalids").GetComponent<UnityEngine.UI.Text>();
         ///////////////////////////////////////
         // Game management
         ///////////////////////////////////////
@@ -175,6 +187,27 @@ public class GameRun : MonoBehaviour
             // Compute reward
             ///////////////////////////////////////
             float reward = ComputeReward(deck, action);
+
+            switch(reward)
+            {
+                case -2.0f:
+                    invalids++;
+                    textInvalids.text = "Invalids: "+invalids.ToString();
+                    break;
+
+                case -1.0f:
+                    losses++;
+                    textLosses.text = "Losses: " + losses.ToString();
+                    break;
+                case -0.1f:
+                    ties++;
+                    textTies.text = "Ties: " + ties.ToString();
+                    break;
+                case 1.0f:
+                    wins++;
+                    textWins.text = "Wins: "+wins.ToString();
+                    break;
+            }
 	        
 	        Debug.Log("Turn/reward: " + turn.ToString() + "->" + reward.ToString());
 
@@ -220,7 +253,6 @@ public class GameRun : MonoBehaviour
         foreach (int card in action)
         {
             invalid = true;
-
             for (int i = 0; i < tmpDeck.Length;i++)
             {
                 if(tmpDeck[i] == card)
@@ -231,8 +263,10 @@ public class GameRun : MonoBehaviour
                 }
             }
 
-            if(invalid)
+            if (invalid)
+            {
                 return RWD_ACTION_INVALID;
+            }
         }
 
         // Second see who wins

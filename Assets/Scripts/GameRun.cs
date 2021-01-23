@@ -34,6 +34,7 @@ public class GameRun : MonoBehaviour
     int wins = 0;
     int losses = 0;
     int invalids = 0;
+    float accuracy = 0;
 
 	// Other UI elements
 	private UnityEngine.UI.Text textDeck;
@@ -43,6 +44,7 @@ public class GameRun : MonoBehaviour
     private UnityEngine.UI.Text textWins;
     private UnityEngine.UI.Text textLosses;
     private UnityEngine.UI.Text textInvalids;
+    private UnityEngine.UI.Text textAccuracy;
     // Start is called before the first frame update
     void Start()
     {
@@ -66,6 +68,7 @@ public class GameRun : MonoBehaviour
         textWins = GameObject.Find("TextWins").GetComponent<UnityEngine.UI.Text>();
         textLosses = GameObject.Find("TextLosses").GetComponent<UnityEngine.UI.Text>();
         textInvalids = GameObject.Find("TextInvalids").GetComponent<UnityEngine.UI.Text>();
+        textAccuracy = GameObject.Find("TextWinPercentage").GetComponent<UnityEngine.UI.Text>();
         ///////////////////////////////////////
         // Game management
         ///////////////////////////////////////
@@ -188,26 +191,7 @@ public class GameRun : MonoBehaviour
             ///////////////////////////////////////
             float reward = ComputeReward(deck, action);
 
-            switch(reward)
-            {
-                case -2.0f:
-                    invalids++;
-                    textInvalids.text = "Invalids: "+invalids.ToString();
-                    break;
-
-                case -1.0f:
-                    losses++;
-                    textLosses.text = "Losses: " + losses.ToString();
-                    break;
-                case -0.1f:
-                    ties++;
-                    textTies.text = "Ties: " + ties.ToString();
-                    break;
-                case 1.0f:
-                    wins++;
-                    textWins.text = "Wins: "+wins.ToString();
-                    break;
-            }
+            UpdateUI(reward,turn);
 	        
 	        Debug.Log("Turn/reward: " + turn.ToString() + "->" + reward.ToString());
 
@@ -221,7 +205,7 @@ public class GameRun : MonoBehaviour
             //            the newly generated cards (otherwise it will see the previous ones)
             yield return new WaitForEndOfFrame();
 
-            yield return new WaitForSeconds(0.1f);
+            //yield return new WaitForSeconds(0.1f);
 
     	}
 
@@ -286,5 +270,35 @@ public class GameRun : MonoBehaviour
     	if(score == 0) return RWD_TIE;
     	else if(score > 0) return RWD_HAND_WON;
     	else return RWD_HAND_LOST;
+    }
+
+    void UpdateUI(float reward,int turn)
+    {
+        switch (reward)
+        {
+            case -2.0f:
+                invalids++;
+                textInvalids.text = "Invalids: " + invalids.ToString();
+                break;
+
+            case -1.0f:
+                losses++;
+                textLosses.text = "Losses: " + losses.ToString();
+                break;
+            case -0.1f:
+                ties++;
+                textTies.text = "Ties: " + ties.ToString();
+                break;
+            case 1.0f:
+                wins++;
+                textWins.text = "Wins: " + wins.ToString();
+                break;
+        }
+
+        if(turn != 0)
+            accuracy = wins / (float)turn;
+
+        textAccuracy.text = "Accuracy: " + accuracy.ToString();
+        //Debug.Log(accuracy);
     }
 }

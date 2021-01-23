@@ -33,7 +33,7 @@ public class Agent : MonoBehaviour
 	// RL management
 
 	// Update rate of learned values
-	private float learningRate = 0.5f;	
+	private float learningRate = 1f;	
 	// Discount factor when computing the Q values
 	// Note: Usually it is 0.9-0.99, but here the next state is random and is not relevant, so it is not used
 	//private float gamma = 0.0f;    
@@ -43,7 +43,7 @@ public class Agent : MonoBehaviour
 	private float minEpsilon = 0.1f;
 	// Factor to reduce epsilon (number of actions that it
 	// takes it to go down to minEpsilon)
-	private int coolingSteps = 1000;
+	private int coolingSteps = 2000;
 
 
 
@@ -85,7 +85,6 @@ public class Agent : MonoBehaviour
 
     	int [] enemyCards = new int[numEnemyCards];
 
-
     	for(int i=0; i<renderTextures.Length; i++)
     	{
     		enemyCards[i] = ClassifyCard(renderTextures[i]);
@@ -114,7 +113,6 @@ public class Agent : MonoBehaviour
     	return ActionToCards(action);
     }
 
-
     // Get the reward obtained from the current hand; 
     // update q-table accordingly
     // Note: the next state is not relevant here, as it is completely random
@@ -122,7 +120,6 @@ public class Agent : MonoBehaviour
     {
 		qTable [state, action] += learningRate * (reward - qTable [state, action]); 
     }
-
 
     // PRIVATE 
 
@@ -225,7 +222,7 @@ public class Agent : MonoBehaviour
 		if (Random.Range (0.0f, 1.0f) < epsilon) 	// Random action
 		{
 			// Random.Range with ints does not include the maximum
-			action = Random.Range (0, numActions);		
+			action = Random.Range (0, numActions);
 		} 
 		else 	// Best action according to Q-table (column with highest value)
 		{
@@ -237,10 +234,10 @@ public class Agent : MonoBehaviour
 			action = colMax;
 		}
 
-
 		// Reduce epsilon (to gradually reduce the random exploration)
 		if (epsilon > minEpsilon) { 
-			epsilon -= ((1.0f - minEpsilon) / (float)coolingSteps); 
+			epsilon -= ((1.0f - minEpsilon) / (float)coolingSteps);
+            Debug.Log("Epsilon: "+epsilon);
 		}
 
 		return action;

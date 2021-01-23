@@ -47,6 +47,7 @@ public class GameRun : MonoBehaviour
     private UnityEngine.UI.Text textLosses;
     private UnityEngine.UI.Text textInvalids;
     private UnityEngine.UI.Text textAccuracy;
+    private UnityEngine.UI.Text textTurn;
     // Start is called before the first frame update
     void Start()
     {
@@ -79,7 +80,7 @@ public class GameRun : MonoBehaviour
         textLosses = GameObject.Find("TextLosses").GetComponent<UnityEngine.UI.Text>();
         textInvalids = GameObject.Find("TextInvalids").GetComponent<UnityEngine.UI.Text>();
         textAccuracy = GameObject.Find("TextAccuracy").GetComponent<UnityEngine.UI.Text>();
-
+        textTurn = GameObject.Find("TextTurn").GetComponent<UnityEngine.UI.Text>();
 
 
 
@@ -195,7 +196,8 @@ public class GameRun : MonoBehaviour
             {
                 textAction.text += a.ToString() + "/" ;
             }
-            textAction.text += "In Turn: " + turn.ToString();
+
+            textTurn.text = "Turn: " + turn.ToString();
 
             textEnemyAction.text = "Enemy Action: ";
             foreach (int a in enemyChars)
@@ -314,7 +316,7 @@ public class GameRun : MonoBehaviour
         if(turn != 0)
             accuracy = wins / (float)turn;
 
-        textAccuracy.text = "Accuracy: " + accuracy.ToString();
+        textAccuracy.text = "Accuracy: \n" + accuracy.ToString() + "%";
         //Debug.Log(accuracy);
     }
 

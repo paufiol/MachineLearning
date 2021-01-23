@@ -40,8 +40,6 @@ public class GameRun : MonoBehaviour
 
     // Other UI elements
     private UnityEngine.UI.Text textDeck;
-    private UnityEngine.UI.Text textAction;
-    private UnityEngine.UI.Text textEnemyAction;
     private UnityEngine.UI.Text textTies;
     private UnityEngine.UI.Text textWins;
     private UnityEngine.UI.Text textLosses;
@@ -73,17 +71,12 @@ public class GameRun : MonoBehaviour
         // UI management
         ///////////////////////////////////////
         textDeck = GameObject.Find("TextDeck").GetComponent<UnityEngine.UI.Text>();
-        textAction = GameObject.Find("TextAction").GetComponent<UnityEngine.UI.Text>();
-        textEnemyAction = GameObject.Find("TextEnemyPlay").GetComponent<UnityEngine.UI.Text>();
         textTies = GameObject.Find("TextTies").GetComponent<UnityEngine.UI.Text>();
         textWins = GameObject.Find("TextWins").GetComponent<UnityEngine.UI.Text>();
         textLosses = GameObject.Find("TextLosses").GetComponent<UnityEngine.UI.Text>();
         textInvalids = GameObject.Find("TextInvalids").GetComponent<UnityEngine.UI.Text>();
         textAccuracy = GameObject.Find("TextAccuracy").GetComponent<UnityEngine.UI.Text>();
         textTurn = GameObject.Find("TextTurn").GetComponent<UnityEngine.UI.Text>();
-
-
-
 
         ///////////////////////////////////////
         // Game management
@@ -191,19 +184,8 @@ public class GameRun : MonoBehaviour
                 b++;
             }
 
-            textAction.text = " Action:";
-            foreach (int a in action)
-            {
-                textAction.text += a.ToString() + "/" ;
-            }
-
             textTurn.text = "Turn: " + turn.ToString();
 
-            textEnemyAction.text = "Enemy Action: ";
-            foreach (int a in enemyChars)
-            {
-                textEnemyAction.text += a.ToString() + "/";
-            }
             ///////////////////////////////////////
             // Compute reward
             ///////////////////////////////////////
@@ -223,7 +205,7 @@ public class GameRun : MonoBehaviour
             //            the newly generated cards (otherwise it will see the previous ones)
             yield return new WaitForEndOfFrame();
 
-            //yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.1f);
 
     	}
 

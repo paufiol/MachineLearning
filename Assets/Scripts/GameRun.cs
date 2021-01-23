@@ -35,9 +35,11 @@ public class GameRun : MonoBehaviour
     int losses = 0;
     int invalids = 0;
     float accuracy = 0;
+    public Sprite[] displayChars;
+    public SpriteRenderer[] spriteRenderers;
 
-	// Other UI elements
-	private UnityEngine.UI.Text textDeck;
+    // Other UI elements
+    private UnityEngine.UI.Text textDeck;
     private UnityEngine.UI.Text textAction;
     private UnityEngine.UI.Text textEnemyAction;
     private UnityEngine.UI.Text textTies;
@@ -57,6 +59,14 @@ public class GameRun : MonoBehaviour
         props       = Resources.LoadAll("Props/");
         chars       = Resources.LoadAll("Chars/");
 
+        //int i = 0;
+        //foreach (Transform child in GameObject.Find("PlayerDeck").transform)
+        //{
+        //    GameObject it = child.gameObject;
+        //    spriteRenderers[i] = child.GetComponent<SpriteRenderer>();
+        //    i++;
+        //}
+
 
         ///////////////////////////////////////
         // UI management
@@ -68,7 +78,12 @@ public class GameRun : MonoBehaviour
         textWins = GameObject.Find("TextWins").GetComponent<UnityEngine.UI.Text>();
         textLosses = GameObject.Find("TextLosses").GetComponent<UnityEngine.UI.Text>();
         textInvalids = GameObject.Find("TextInvalids").GetComponent<UnityEngine.UI.Text>();
-        textAccuracy = GameObject.Find("TextWinPercentage").GetComponent<UnityEngine.UI.Text>();
+        textAccuracy = GameObject.Find("TextAccuracy").GetComponent<UnityEngine.UI.Text>();
+
+
+
+
+
         ///////////////////////////////////////
         // Game management
         ///////////////////////////////////////
@@ -150,8 +165,9 @@ public class GameRun : MonoBehaviour
             ///////////////////////////////////////
             int [] deck   = GeneratePlayerDeck();
 	        textDeck.text = "Deck: ";
-	        foreach(int card in deck)
-	        	textDeck.text += card.ToString() + "/";
+            ChangeDeckSprites(deck);
+	        //foreach(int card in deck)
+	        //	textDeck.text += card.ToString() + "/";
 
             //yield end frame
 
@@ -300,5 +316,13 @@ public class GameRun : MonoBehaviour
 
         textAccuracy.text = "Accuracy: " + accuracy.ToString();
         //Debug.Log(accuracy);
+    }
+
+    void ChangeDeckSprites(int[]deck)
+    {
+        for(int i = 0; i < DECK_SIZE;i++)
+        {
+            spriteRenderers[i].sprite = displayChars[deck[i]];
+        }
     }
 }

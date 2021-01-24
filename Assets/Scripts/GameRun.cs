@@ -35,6 +35,11 @@ public class GameRun : MonoBehaviour
     int losses = 0;
     int invalids = 0;
     float accuracy = 0;
+    int winnableGames = 0;
+    int unwinnablegames = 0;
+    float winnableGamesPercentage = 0;
+    int winnableWon = 0;
+    float winnableWonPercent = 0;
     public Sprite[] displayChars;
     public SpriteRenderer[] spriteRenderers;
 
@@ -43,9 +48,12 @@ public class GameRun : MonoBehaviour
     private UnityEngine.UI.Text textTies;
     private UnityEngine.UI.Text textWins;
     private UnityEngine.UI.Text textLosses;
-    private UnityEngine.UI.Text textInvalids;
     private UnityEngine.UI.Text textAccuracy;
     private UnityEngine.UI.Text textTurn;
+    private UnityEngine.UI.Text textWinnable;
+    private UnityEngine.UI.Text textUnwinnable;
+    private UnityEngine.UI.Text TextWInnablePercentage;
+    private UnityEngine.UI.Text TextWinnableWon;
     // Start is called before the first frame update
     void Start()
     {
@@ -58,15 +66,6 @@ public class GameRun : MonoBehaviour
         props       = Resources.LoadAll("Props/");
         chars       = Resources.LoadAll("Chars/");
 
-        //int i = 0;
-        //foreach (Transform child in GameObject.Find("PlayerDeck").transform)
-        //{
-        //    GameObject it = child.gameObject;
-        //    spriteRenderers[i] = child.GetComponent<SpriteRenderer>();
-        //    i++;
-        //}
-
-
         ///////////////////////////////////////
         // UI management
         ///////////////////////////////////////
@@ -74,9 +73,12 @@ public class GameRun : MonoBehaviour
         textTies = GameObject.Find("TextTies").GetComponent<UnityEngine.UI.Text>();
         textWins = GameObject.Find("TextWins").GetComponent<UnityEngine.UI.Text>();
         textLosses = GameObject.Find("TextLosses").GetComponent<UnityEngine.UI.Text>();
-        textInvalids = GameObject.Find("TextInvalids").GetComponent<UnityEngine.UI.Text>();
         textAccuracy = GameObject.Find("TextAccuracy").GetComponent<UnityEngine.UI.Text>();
         textTurn = GameObject.Find("TextTurn").GetComponent<UnityEngine.UI.Text>();
+        textWinnable = GameObject.Find("TextWinnableGames").GetComponent<UnityEngine.UI.Text>();
+        textUnwinnable = GameObject.Find("TextUnwinnableGames").GetComponent<UnityEngine.UI.Text>();
+        TextWInnablePercentage = GameObject.Find("TextWInnablePercentage").GetComponent<UnityEngine.UI.Text>();
+        TextWinnableWon = GameObject.Find("TextWinnableWon").GetComponent<UnityEngine.UI.Text>();
 
         ///////////////////////////////////////
         // Game management
@@ -133,12 +135,12 @@ public class GameRun : MonoBehaviour
    	  	else if(chars[idx].name.StartsWith("opossum")) label = 2;
 
     	return label;
-    } 
+    }
 
     // Generate another turn
     IEnumerator GenerateTurn()
     {	
-    	for(int turn=0; turn<100000; turn++) {
+    	for(int turn=1; turn<100000; turn++) {
 
 	        ///////////////////////////////////////
 	        // Generate enemy cards
@@ -160,8 +162,25 @@ public class GameRun : MonoBehaviour
             int [] deck   = GeneratePlayerDeck();
 	        textDeck.text = "Deck: ";
             ChangeDeckSprites(deck);
-	        //foreach(int card in deck)
-	        //	textDeck.text += card.ToString() + "/";
+
+            //Winnable/Unwinnable check
+            bool winnable = WinnableCheck(deck);
+            if(winnable)
+            {
+                winnableGames++;
+                textWinnable.text = "Winnable games: " + winnableGames.ToString();
+            }
+            else
+            {
+                unwinnablegames++;
+                textUnwinnable.text = "Unwinnable games: " + unwinnablegames.ToString();
+            }
+
+            if (turn != 0)
+            {
+                winnableGamesPercentage = (float)winnableGames / (float)turn * 100;
+                TextWInnablePercentage.text = "Ideal Winrate: \n" + winnableGamesPercentage.ToString() + "%";
+            }
 
             //yield end frame
 
@@ -191,7 +210,7 @@ public class GameRun : MonoBehaviour
             ///////////////////////////////////////
             float reward = ComputeReward(deck, action);
 
-            UpdateUI(reward,turn);
+            UpdateUI(reward,turn,winnable);
 	        
 	        Debug.Log("Turn/reward: " + turn.ToString() + "->" + reward.ToString());
 
@@ -231,26 +250,10 @@ public class GameRun : MonoBehaviour
    	// action -> array with the class of each card played
     private float ComputeReward(int [] deck, int [] action)
     {
-        int[] tmpDeck = deck;
-        bool invalid = true;
-        // First check if the action is valid given the player's deck
-        foreach (int card in action)
+        int[] tmpDeck = { 0, 0, 0, 0 };
+        for (int i = 0; i < deck.Length; i++)
         {
-            invalid = true;
-            for (int i = 0; i < tmpDeck.Length;i++)
-            {
-                if(tmpDeck[i] == card)
-                {
-                    tmpDeck[i] = -1;
-                    invalid = false;
-                    break;
-                }
-            }
-
-            if (invalid)
-            {
-                return RWD_ACTION_INVALID;
-            }
+            tmpDeck[i] = deck[i];
         }
 
         // Second see who wins
@@ -272,13 +275,12 @@ public class GameRun : MonoBehaviour
     	else return RWD_HAND_LOST;
     }
 
-    void UpdateUI(float reward,int turn)
+    void UpdateUI(float reward,int turn,bool winnable)
     {
         switch (reward)
         {
             case -2.0f:
                 invalids++;
-                textInvalids.text = "Invalids: " + invalids.ToString();
                 break;
 
             case -1.0f:
@@ -298,7 +300,16 @@ public class GameRun : MonoBehaviour
         if(turn != 0)
             accuracy = wins / (float)turn * 100;
 
-        textAccuracy.text = "Accuracy: \n" + accuracy.ToString() + "%";
+        textAccuracy.text = "Winrate: \n" + accuracy.ToString() + "%";
+
+        if (winnable && reward == 1)
+            winnableWon++;
+
+        //winnableWonPercent = (float)winnableWon / (float)winnableGames * 100;
+        winnableWonPercent = accuracy / winnableGamesPercentage * 100;
+
+        TextWinnableWon.text = "Winnable Won: \n" + winnableWonPercent.ToString() + "%";
+
         //Debug.Log(accuracy);
     }
 
@@ -308,5 +319,63 @@ public class GameRun : MonoBehaviour
         {
             spriteRenderers[i].sprite = displayChars[deck[i]];
         }
+    }
+
+    bool WinnableCheck(int[]deck)
+    {
+        int[] tmpDeck = { 0, 0, 0, 0 };
+
+        for (int i = 0; i < deck.Length; i++)
+        {
+            tmpDeck[i] = deck[i];
+        }
+
+        int wins = 0;
+        foreach (int enemyCard in enemyChars)
+        {
+            for(int i = 0; i < tmpDeck.Length;i++)
+            {
+                bool won = false;
+                switch(enemyCard)
+                {
+                    case 0: //Fox
+                        if(tmpDeck[i] == 1) //Frog beats Fox
+                        {
+                            wins++;
+                            tmpDeck[i] = -1;
+                            won = true;
+                        }
+                        break;
+                    case 1: //Frog
+                        if (tmpDeck[i] == 2) //Opossum beats Frog
+                        {
+                            wins++;
+                            tmpDeck[i] = -1;
+                            won = true;
+                        }
+                        break;
+                    case 2: //Opossum
+                        if (tmpDeck[i] == 0) //Fox beats Opossum
+                        {
+                            wins++;
+                            tmpDeck[i] = -1;
+                            won = true;
+                        }
+                        break;
+                }
+                if(won)
+                {
+                    break;
+                }
+            }
+
+            if(wins > 1)
+            {
+                return true;
+            }
+        }
+
+
+        return false;
     }
 }

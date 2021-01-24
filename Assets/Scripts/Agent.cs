@@ -93,24 +93,44 @@ public class Agent : MonoBehaviour
     	}
 
 
-    	//foreach(int x in enemyCards)
-    	//	Debug.Log(x);
-
     	// Second: compute the state of the game
     	CountMyCards(deck);
 
     	oldState = state;
     	state    = ComputeState(enemyCards);
 
-    	// Third: choose an action
-    	action = ChooseAction();
+        int[] finalAction = { 0,0,0};
+        bool invalid = true;
+        
+        while (invalid)
+        {
+            // Third: choose an action
+            action = ChooseAction();
 
-    	//Debug.Log("ACTION");
-    	//Debug.Log(action);
+            finalAction = ActionToCards(action);
 
+            int[] tmpDeck= { 0, 0, 0,0 };
 
-    	// Translate the action to cards and return
-    	return ActionToCards(action);
+            for(int i =0; i< deck.Length;i++)
+            {
+                tmpDeck[i] = deck[i];
+            }
+
+            invalid = InvalidCheck(finalAction, tmpDeck);
+
+            if(invalid)
+                qTable[state, action] += learningRate * (-2 - qTable[state, action]);
+        }
+
+        // Reduce epsilon (to gradually reduce the random exploration)
+        if (epsilon > minEpsilon)
+        {
+            epsilon -= ((1.0f - minEpsilon) / (float)coolingSteps);
+            Debug.Log("Epsilon: " + epsilon);
+        }
+
+        // Translate the action to cards and return
+        return finalAction;
     }
 
     // Get the reward obtained from the current hand; 
@@ -219,29 +239,26 @@ public class Agent : MonoBehaviour
 		else 	// Best action according to Q-table (column with highest value)
 		{
 			int colMax = 0;
-			for (int col = 1; col < numActions; col++)
-				if (qTable [state, col] > qTable [state, colMax])
-					colMax = col;
+            for (int col = 1; col < numActions; col++)
+                if (qTable[state, col] > qTable[state, colMax])
+                {
+                    colMax = col;
+                    if (qTable[state, col] >= 1)
+                        break;
+                }
 
 			action = colMax;
 		}
 
-		// Reduce epsilon (to gradually reduce the random exploration)
-		if (epsilon > minEpsilon) { 
-			epsilon -= ((1.0f - minEpsilon) / (float)coolingSteps);
-            Debug.Log("Epsilon: "+epsilon);
-		}
+		//Used to reduce epsilon
 
 		return action;
     }
-   
 
     // Translate the int that encodes the action into an array with the
     // cards that the agent is playing
    	private int [] ActionToCards(int action)
    	{
-   		//Debug.Log("ActionToCards");
-   		//Debug.Log(action);
 
    		int [] cards = new int[numEnemyCards];  // Enemy and player show the same number of cards
 
@@ -251,11 +268,32 @@ public class Agent : MonoBehaviour
    			action  /= NUM_CLASSES;
    		}
 
-   		//foreach(int x in cards)
-   		//	Debug.Log(x);
-
    		return cards;
    	}
 
+    bool InvalidCheck(int[] action,int[] tmpDeck)
+    {
+        bool invalid = true;
+        foreach (int card in action)
+        {
+            invalid = true;
+            for (int i = 0; i < tmpDeck.Length; i++)
+            {
+                if (tmpDeck[i] == card)
+                {
+                    tmpDeck[i] = -1;
+                    invalid = false;
+                    break;
+                }
+            }
+
+            if (invalid)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
 }

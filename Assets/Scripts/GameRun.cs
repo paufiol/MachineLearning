@@ -296,7 +296,7 @@ public class GameRun : MonoBehaviour
         }
 
         if(turn != 0)
-            accuracy = wins / (float)turn;
+            accuracy = wins / (float)turn * 100;
 
         textAccuracy.text = "Accuracy: \n" + accuracy.ToString() + "%";
         //Debug.Log(accuracy);

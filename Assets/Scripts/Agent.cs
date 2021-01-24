@@ -169,10 +169,6 @@ public class Agent : MonoBehaviour
     	for(int i=0; i<deck.Length; i++)
     		myCards[deck[i]]++;
 
-    	//Debug.Log("ExtractMyCards");
-    	//foreach(int x in myCards)
-    	//	Debug.Log(x);
-
     }
 
 
@@ -204,10 +200,6 @@ public class Agent : MonoBehaviour
     	// Combine both. We need the max possible of one of them to convert
     	// 2-indices to 1-index
     	int state = enemy + player*enemyCombinations;
-    	//Debug.Log("STATE");
-    	//Debug.Log(enemy);
-    	//Debug.Log(player);
-    	//Debug.Log(state);
 
     	return state;
     }
